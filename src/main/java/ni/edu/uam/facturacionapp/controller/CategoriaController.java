@@ -44,8 +44,8 @@ public class CategoriaController {
         listaCategorias.addAll(categoriaDAO.listar());
     }
 
-    // Método auxiliar para mostrar alertas de advertencia/error
-    private void mostrarError(String titulo, String mensaje) {
+    // Método de alerta con firma idéntica al ejemplo de la guía
+    private void mostrarAdvertencia(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
@@ -53,24 +53,22 @@ public class CategoriaController {
         alert.showAndWait();
     }
 
-    // Método centralizado para validar campos de la categoría
-    private boolean validarCategoria(Integer idActual) {
+    // Validaciones de nombre antes de guardar o actualizar
+    private boolean validarCamposNombre(Integer idActual) {
         String nombre = txtNombre.getText() != null ? txtNombre.getText().trim() : "";
 
-        // 1 y 2. El nombre no puede estar vacío ni contener únicamente espacios
         if (nombre.isEmpty()) {
-            mostrarError("Validación", "El nombre de la categoría es obligatorio.");
+            mostrarAdvertencia("Validación", "El nombre de la categoría es obligatorio.");
             txtNombre.requestFocus();
             return false;
         }
 
-        // 3. Verificación de duplicados utilizando las sobrecargas del DAO
         boolean existe = (idActual == null)
                 ? categoriaDAO.existeNombre(nombre)
                 : categoriaDAO.existeNombre(nombre, idActual);
 
         if (existe) {
-            mostrarError("Validación", "Ya existe una categoría con el nombre '" + nombre + "'.");
+            mostrarAdvertencia("Validación", "Ya existe una categoría con el nombre '" + nombre + "'.");
             txtNombre.requestFocus();
             return false;
         }
@@ -80,8 +78,7 @@ public class CategoriaController {
 
     @FXML
     private void guardar() {
-        // Aplica validaciones de campo obligatorio y duplicado
-        if (!validarCategoria(null)) {
+        if (!validarCamposNombre(null)) {
             return;
         }
 
@@ -95,23 +92,27 @@ public class CategoriaController {
         }
     }
 
+    // 6. Validación para actualizar Categoria
     @FXML
     private void actualizar() {
-        // 4. Para actualizar debe existir una categoría seleccionada
-        if (categoriaSeleccionada == null) {
-            mostrarError("Validación", "Debe seleccionar una categoría de la tabla para actualizar.");
+        Categoria seleccionada = tblCategorias.getSelectionModel().getSelectedItem();
+
+        if (seleccionada == null) {
+            mostrarAdvertencia(
+                    "Seleccione una categoría",
+                    "Debe seleccionar la categoría que desea actualizar."
+            );
             return;
         }
 
-        // Aplica validaciones excluyendo el ID seleccionado
-        if (!validarCategoria(categoriaSeleccionada.getId())) {
+        if (!validarCamposNombre(seleccionada.getId())) {
             return;
         }
 
-        categoriaSeleccionada.setNombre(txtNombre.getText().trim());
-        categoriaSeleccionada.setActiva(chkActivo.isSelected());
+        seleccionada.setNombre(txtNombre.getText().trim());
+        seleccionada.setActiva(chkActivo.isSelected());
 
-        if (categoriaDAO.actualizar(categoriaSeleccionada)) {
+        if (categoriaDAO.actualizar(seleccionada)) {
             mensaje(Alert.AlertType.INFORMATION, "Categoría actualizada con éxito.");
             cargarCategorias();
             limpiar();
@@ -120,21 +121,29 @@ public class CategoriaController {
         }
     }
 
+    // 7. Validar eliminación de Categoria
     @FXML
     private void eliminar() {
-        // 5. Para eliminar debe existir una categoría seleccionada
-        if (categoriaSeleccionada == null) {
-            mostrarError("Validación", "Debe seleccionar una categoría de la tabla para eliminar.");
+        Categoria seleccionada = tblCategorias.getSelectionModel().getSelectedItem();
+
+        if (seleccionada == null) {
+            mostrarAdvertencia(
+                    "Seleccione una categoría",
+                    "Debe seleccionar la categoría que desea eliminar."
+            );
             return;
         }
 
-        // Validación de integridad referencial
-        if (categoriaDAO.tieneProductosAsociados(categoriaSeleccionada.getId())) {
-            mostrarError("Integridad Referencial", "No se puede eliminar la categoría porque tiene productos asociados.");
+        // Consulta si existen productos asociados antes de ejecutar DELETE
+        if (categoriaDAO.tieneProductos(seleccionada.getId())) {
+            mostrarAdvertencia(
+                    "Operación cancelada",
+                    "No se puede eliminar la categoría porque existen productos asociados."
+            );
             return;
         }
 
-        if (categoriaDAO.eliminar(categoriaSeleccionada.getId())) {
+        if (categoriaDAO.eliminar(seleccionada.getId())) {
             mensaje(Alert.AlertType.INFORMATION, "Categoría eliminada con éxito.");
             cargarCategorias();
             limpiar();

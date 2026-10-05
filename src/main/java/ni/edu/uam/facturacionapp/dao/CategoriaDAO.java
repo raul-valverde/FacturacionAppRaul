@@ -75,10 +75,16 @@ public class CategoriaDAO {
         }
     }
 
-    public boolean tieneProductosAsociados(int categoriaId) {
-        String sql = "SELECT COUNT(*) FROM producto WHERE categoria_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    // 7. Método para verificar si existen productos asociados antes del DELETE
+    public boolean tieneProductos(int categoriaId) {
+        String sql = """
+            SELECT COUNT(*)
+            FROM producto
+            WHERE categoria_id = ?
+            """;
+
+        try (Connection cn = DatabaseConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
 
             ps.setInt(1, categoriaId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -100,8 +106,8 @@ public class CategoriaDAO {
             WHERE LOWER(nombre) = LOWER(?)
             """;
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection cn = DatabaseConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
 
             ps.setString(1, nombre.trim());
             try (ResultSet rs = ps.executeQuery()) {
@@ -115,7 +121,7 @@ public class CategoriaDAO {
         return false;
     }
 
-    // Método para verificar duplicados en UPDATE (excluyendo el registro actual)
+    // Método para verificar duplicados en UPDATE (excluyendo la categoría actual)
     public boolean existeNombre(String nombre, int idExcluir) {
         String sql = """
             SELECT COUNT(*)
@@ -123,8 +129,8 @@ public class CategoriaDAO {
             WHERE LOWER(nombre) = LOWER(?) AND id <> ?
             """;
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection cn = DatabaseConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
 
             ps.setString(1, nombre.trim());
             ps.setInt(2, idExcluir);
