@@ -146,7 +146,8 @@ public class ProductoController {
         }
     }
 
-    private void mostrarAdvertencia(String titulo, String mensaje) {
+    // Método de alerta para mostrar errores de validación según el diseño de la guía
+    private void mostrarError(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
@@ -154,69 +155,72 @@ public class ProductoController {
         alert.showAndWait();
     }
 
-    // 8. Método para validar las condiciones del módulo Producto
+    // 9. Validar campos obligatorios de Producto y reglas adicionales
     private boolean validarProducto(Integer idActual) {
         String codigo = txtCodigo.getText() != null ? txtCodigo.getText().trim() : "";
         String nombre = txtNombre.getText() != null ? txtNombre.getText().trim() : "";
-        String precioTexto = txtPrecio.getText() != null ? txtPrecio.getText().trim() : "";
-        String existenciaTexto = txtExistencia.getText() != null ? txtExistencia.getText().trim() : "";
 
-        // 1. Código: Obligatorio
+        // Validaciones obligatorias exactamente según la guía
         if (codigo.isEmpty()) {
-            mostrarAdvertencia("Validación", "El código del producto es obligatorio.");
+            mostrarError(
+                    "Validación",
+                    "El código del producto es obligatorio."
+            );
             txtCodigo.requestFocus();
             return false;
         }
 
-        // 1. Código: No duplicado (consulta previa en base de datos)
+        if (nombre.isEmpty()) {
+            mostrarError(
+                    "Validación",
+                    "El nombre del producto es obligatorio."
+            );
+            txtNombre.requestFocus();
+            return false;
+        }
+
+        // Control de código duplicado
         boolean codigoExiste = (idActual == null)
                 ? productoDAO.existeCodigo(codigo)
                 : productoDAO.existeCodigo(codigo, idActual);
 
         if (codigoExiste) {
-            mostrarAdvertencia("Validación", "El código '" + codigo + "' ya está registrado en la base de datos.");
+            mostrarError("Validación", "El código '" + codigo + "' ya está registrado en la base de datos.");
             txtCodigo.requestFocus();
             return false;
         }
 
-        // 2. Nombre: Obligatorio
-        if (nombre.isEmpty()) {
-            mostrarAdvertencia("Validación", "El nombre del producto es obligatorio.");
-            txtNombre.requestFocus();
-            return false;
-        }
-
-        // 3. Categoría: Debe seleccionarse una categoría
+        // Selección obligatoria de categoría
         if (cmbCategoria.getValue() == null) {
-            mostrarAdvertencia("Validación", "Debe seleccionar una categoría.");
+            mostrarError("Validación", "Debe seleccionar una categoría.");
             cmbCategoria.requestFocus();
             return false;
         }
 
-        // 4. Precio de Venta: Debe ser numérico y mayor que cero
+        // Validación de precio de venta (numérico y > 0)
         try {
-            BigDecimal precio = new BigDecimal(precioTexto);
+            BigDecimal precio = new BigDecimal(txtPrecio.getText().trim());
             if (precio.compareTo(BigDecimal.ZERO) <= 0) {
-                mostrarAdvertencia("Validación", "El precio de venta debe ser mayor que cero.");
+                mostrarError("Validación", "El precio de venta debe ser mayor que cero.");
                 txtPrecio.requestFocus();
                 return false;
             }
         } catch (NumberFormatException e) {
-            mostrarAdvertencia("Validación", "El precio de venta debe ser un número válido.");
+            mostrarError("Validación", "El precio de venta debe ser un número válido.");
             txtPrecio.requestFocus();
             return false;
         }
 
-        // 5. Existencia: Debe ser entero y no negativo
+        // Validación de existencia (entero no negativo)
         try {
-            int existencia = Integer.parseInt(existenciaTexto);
+            int existencia = Integer.parseInt(txtExistencia.getText().trim());
             if (existencia < 0) {
-                mostrarAdvertencia("Validación", "La existencia debe ser un número no negativo.");
+                mostrarError("Validación", "La existencia debe ser un número no negativo.");
                 txtExistencia.requestFocus();
                 return false;
             }
         } catch (NumberFormatException e) {
-            mostrarAdvertencia("Validación", "La existencia debe ser un número entero válido.");
+            mostrarError("Validación", "La existencia debe ser un número entero válido.");
             txtExistencia.requestFocus();
             return false;
         }
@@ -263,7 +267,7 @@ public class ProductoController {
         Producto seleccionado = tblProductos.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {
-            mostrarAdvertencia("Seleccione un producto", "Debe seleccionar un producto de la tabla para actualizar.");
+            mostrarError("Seleccione un producto", "Debe seleccionar un producto de la tabla para actualizar.");
             return;
         }
 
@@ -301,7 +305,7 @@ public class ProductoController {
         Producto seleccionado = tblProductos.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {
-            mostrarAdvertencia("Seleccione un producto", "Debe seleccionar un producto de la tabla para eliminar.");
+            mostrarError("Seleccione un producto", "Debe seleccionar un producto de la tabla para eliminar.");
             return;
         }
 
