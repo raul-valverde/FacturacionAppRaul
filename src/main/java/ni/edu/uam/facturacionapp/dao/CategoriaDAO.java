@@ -74,6 +74,7 @@ public class CategoriaDAO {
             return false;
         }
     }
+
     public boolean tieneProductosAsociados(int categoriaId) {
         String sql = "SELECT COUNT(*) FROM producto WHERE categoria_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -90,19 +91,43 @@ public class CategoriaDAO {
         }
         return false;
     }
-    public boolean existeNombre(String nombre, Integer idExcluir) {
-        String sql = idExcluir == null
-                ? "SELECT COUNT(*) FROM categoria WHERE LOWER(nombre) = LOWER(?)"
-                : "SELECT COUNT(*) FROM categoria WHERE LOWER(nombre) = LOWER(?) AND id <> ?";
+
+    // Método para verificar duplicados en INSERT (registro nuevo)
+    public boolean existeNombre(String nombre) {
+        String sql = """
+            SELECT COUNT(*)
+            FROM categoria
+            WHERE LOWER(nombre) = LOWER(?)
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, nombre.trim());
-            if (idExcluir != null) {
-                ps.setInt(2, idExcluir);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
+    // Método para verificar duplicados en UPDATE (excluyendo el registro actual)
+    public boolean existeNombre(String nombre, int idExcluir) {
+        String sql = """
+            SELECT COUNT(*)
+            FROM categoria
+            WHERE LOWER(nombre) = LOWER(?) AND id <> ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, nombre.trim());
+            ps.setInt(2, idExcluir);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;

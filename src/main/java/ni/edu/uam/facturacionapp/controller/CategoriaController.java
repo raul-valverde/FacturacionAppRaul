@@ -44,7 +44,7 @@ public class CategoriaController {
         listaCategorias.addAll(categoriaDAO.listar());
     }
 
-    // Método auxiliar de alerta tal como en la imagen del profesor
+    // Método auxiliar para mostrar alertas de advertencia/error
     private void mostrarError(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(titulo);
@@ -53,7 +53,7 @@ public class CategoriaController {
         alert.showAndWait();
     }
 
-    // Método de validación de campos según las reglas especificadas
+    // Método centralizado para validar campos de la categoría
     private boolean validarCategoria(Integer idActual) {
         String nombre = txtNombre.getText() != null ? txtNombre.getText().trim() : "";
 
@@ -64,8 +64,12 @@ public class CategoriaController {
             return false;
         }
 
-        // 3. No deberán existir categorías con el mismo nombre
-        if (categoriaDAO.existeNombre(nombre, idActual)) {
+        // 3. Verificación de duplicados utilizando las sobrecargas del DAO
+        boolean existe = (idActual == null)
+                ? categoriaDAO.existeNombre(nombre)
+                : categoriaDAO.existeNombre(nombre, idActual);
+
+        if (existe) {
             mostrarError("Validación", "Ya existe una categoría con el nombre '" + nombre + "'.");
             txtNombre.requestFocus();
             return false;
@@ -76,7 +80,7 @@ public class CategoriaController {
 
     @FXML
     private void guardar() {
-        // Aplica validaciones 1, 2 y 3
+        // Aplica validaciones de campo obligatorio y duplicado
         if (!validarCategoria(null)) {
             return;
         }
@@ -99,7 +103,7 @@ public class CategoriaController {
             return;
         }
 
-        // Aplica validaciones 1, 2 y 3 (excluyendo la propia categoría al verificar duplicado)
+        // Aplica validaciones excluyendo el ID seleccionado
         if (!validarCategoria(categoriaSeleccionada.getId())) {
             return;
         }
