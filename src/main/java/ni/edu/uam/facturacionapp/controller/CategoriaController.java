@@ -68,6 +68,12 @@ public class CategoriaController {
             return;
         }
 
+        // VALIDACIÓN CAMPO OBLIGATORIO (Agregado)
+        if (txtNombre.getText().isBlank()) {
+            mensaje(Alert.AlertType.WARNING, "El nombre de la categoría no puede estar vacío.");
+            return;
+        }
+
         categoriaSeleccionada.setNombre(txtNombre.getText().trim());
         categoriaSeleccionada.setActiva(chkActivo.isSelected());
 
@@ -87,12 +93,18 @@ public class CategoriaController {
             return;
         }
 
+        // VALIDACIÓN PREVIA DE INTEGRIDAD REFERENCIAL (Agregado)
+        if (categoriaDAO.tieneProductosAsociados(categoriaSeleccionada.getId())) {
+            mensaje(Alert.AlertType.WARNING, "No se puede eliminar la categoría porque tiene productos asociados.");
+            return;
+        }
+
         if (categoriaDAO.eliminar(categoriaSeleccionada.getId())) {
             mensaje(Alert.AlertType.INFORMATION, "Categoría eliminada con éxito.");
             cargarCategorias();
             limpiar();
         } else {
-            mensaje(Alert.AlertType.ERROR, "No se pudo eliminar (puede estar asociada a productos).");
+            mensaje(Alert.AlertType.ERROR, "Error en la base de datos al intentar eliminar.");
         }
     }
 

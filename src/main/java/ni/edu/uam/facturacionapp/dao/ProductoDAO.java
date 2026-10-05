@@ -125,4 +125,27 @@ public class ProductoDAO {
         }
         return lista;
     }
+    public boolean existeCodigo(String codigo, Integer idExcluir) {
+        String sql = idExcluir == null
+                ? "SELECT COUNT(*) FROM producto WHERE LOWER(codigo) = LOWER(?)"
+                : "SELECT COUNT(*) FROM producto WHERE LOWER(codigo) = LOWER(?) AND id <> ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, codigo.trim());
+            if (idExcluir != null) {
+                ps.setInt(2, idExcluir);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

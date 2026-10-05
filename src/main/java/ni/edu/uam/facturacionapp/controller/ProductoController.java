@@ -279,14 +279,8 @@ public class ProductoController {
     }
 
     private boolean existeCodigoDuplicado(String codigo, Integer idActual) {
-        for (Producto p : productos) {
-            if (p.getCodigo().equalsIgnoreCase(codigo.trim())) {
-                if (idActual == null || !p.getId().equals(idActual)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        // Consulta previa en Base de Datos (SQL)
+        return productoDAO.existeCodigo(codigo, idActual);
     }
 
     @FXML

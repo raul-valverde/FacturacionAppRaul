@@ -74,4 +74,20 @@ public class CategoriaDAO {
             return false;
         }
     }
+    public boolean tieneProductosAsociados(int categoriaId) {
+        String sql = "SELECT COUNT(*) FROM producto WHERE categoria_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, categoriaId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
