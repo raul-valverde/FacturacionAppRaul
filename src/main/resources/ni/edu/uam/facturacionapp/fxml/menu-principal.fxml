@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ni.edu.uam.facturacionapp.controller.MenuPrincipalController">
+    <top>
+        <VBox prefHeight="43.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+            <children>
+                <MenuBar>
+                    <menus>
+                        <Menu text="Mantenimiento">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#abrirProductos" text="Productos" />
+                                <MenuItem mnemonicParsing="false" onAction="#abrirCategorias" text="Categorías" />
+                            </items>
+                        </Menu>
+                        <Menu text="Salir">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#salir" text="Cerrar Aplicación" />
+                            </items>
+                        </Menu>
+                        <Menu text="Help">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="About" />
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+                <ToolBar prefHeight="40.0" prefWidth="200.0">
+                    <items>
+                        <Button fx:id="btnProductos" mnemonicParsing="false" onAction="#abrirProductos" text="Productos" />
+                        <Button fx:id="btnCategorias" mnemonicParsing="false" onAction="#abrirCategorias" text="Categorías" />
+                        <Button fx:id="btnSalir" mnemonicParsing="false" onAction="#salir" text="Salir" />
+                    </items>
+                </ToolBar>
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <Label text="Sistema de facturacion" BorderPane.alignment="CENTER" />
+    </center>
+</BorderPane>
