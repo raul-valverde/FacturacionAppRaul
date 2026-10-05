@@ -90,4 +90,27 @@ public class CategoriaDAO {
         }
         return false;
     }
+    public boolean existeNombre(String nombre, Integer idExcluir) {
+        String sql = idExcluir == null
+                ? "SELECT COUNT(*) FROM categoria WHERE LOWER(nombre) = LOWER(?)"
+                : "SELECT COUNT(*) FROM categoria WHERE LOWER(nombre) = LOWER(?) AND id <> ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, nombre.trim());
+            if (idExcluir != null) {
+                ps.setInt(2, idExcluir);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

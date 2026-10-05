@@ -44,10 +44,40 @@ public class CategoriaController {
         listaCategorias.addAll(categoriaDAO.listar());
     }
 
+    // Método auxiliar de alerta tal como en la imagen del profesor
+    private void mostrarError(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    // Método de validación de campos según las reglas especificadas
+    private boolean validarCategoria(Integer idActual) {
+        String nombre = txtNombre.getText() != null ? txtNombre.getText().trim() : "";
+
+        // 1 y 2. El nombre no puede estar vacío ni contener únicamente espacios
+        if (nombre.isEmpty()) {
+            mostrarError("Validación", "El nombre de la categoría es obligatorio.");
+            txtNombre.requestFocus();
+            return false;
+        }
+
+        // 3. No deberán existir categorías con el mismo nombre
+        if (categoriaDAO.existeNombre(nombre, idActual)) {
+            mostrarError("Validación", "Ya existe una categoría con el nombre '" + nombre + "'.");
+            txtNombre.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
     @FXML
     private void guardar() {
-        if (txtNombre.getText().isBlank()) {
-            mensaje(Alert.AlertType.WARNING, "Ingrese el nombre de la categoría.");
+        // Aplica validaciones 1, 2 y 3
+        if (!validarCategoria(null)) {
             return;
         }
 
@@ -63,14 +93,14 @@ public class CategoriaController {
 
     @FXML
     private void actualizar() {
+        // 4. Para actualizar debe existir una categoría seleccionada
         if (categoriaSeleccionada == null) {
-            mensaje(Alert.AlertType.WARNING, "Seleccione una categoría de la tabla.");
+            mostrarError("Validación", "Debe seleccionar una categoría de la tabla para actualizar.");
             return;
         }
 
-        // VALIDACIÓN CAMPO OBLIGATORIO (Agregado)
-        if (txtNombre.getText().isBlank()) {
-            mensaje(Alert.AlertType.WARNING, "El nombre de la categoría no puede estar vacío.");
+        // Aplica validaciones 1, 2 y 3 (excluyendo la propia categoría al verificar duplicado)
+        if (!validarCategoria(categoriaSeleccionada.getId())) {
             return;
         }
 
@@ -88,14 +118,15 @@ public class CategoriaController {
 
     @FXML
     private void eliminar() {
+        // 5. Para eliminar debe existir una categoría seleccionada
         if (categoriaSeleccionada == null) {
-            mensaje(Alert.AlertType.WARNING, "Seleccione una categoría de la tabla.");
+            mostrarError("Validación", "Debe seleccionar una categoría de la tabla para eliminar.");
             return;
         }
 
-        // VALIDACIÓN PREVIA DE INTEGRIDAD REFERENCIAL (Agregado)
+        // Validación de integridad referencial
         if (categoriaDAO.tieneProductosAsociados(categoriaSeleccionada.getId())) {
-            mensaje(Alert.AlertType.WARNING, "No se puede eliminar la categoría porque tiene productos asociados.");
+            mostrarError("Integridad Referencial", "No se puede eliminar la categoría porque tiene productos asociados.");
             return;
         }
 
@@ -104,7 +135,7 @@ public class CategoriaController {
             cargarCategorias();
             limpiar();
         } else {
-            mensaje(Alert.AlertType.ERROR, "Error en la base de datos al intentar eliminar.");
+            mensaje(Alert.AlertType.ERROR, "Error al eliminar la categoría.");
         }
     }
 
