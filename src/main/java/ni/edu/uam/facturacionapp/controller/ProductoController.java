@@ -211,6 +211,15 @@ public class ProductoController {
         // Validación de precio de venta (numérico y > 0)
         try {
             BigDecimal precio = new BigDecimal(txtPrecio.getText().trim());
+
+            if (precio.compareTo(BigDecimal.ZERO) <= 0) {
+                mostrarError(
+                        "Precio incorrecto",
+                        "El precio de venta debe ser mayor que cero."
+                );
+                txtPrecio.requestFocus();
+                return false;
+            }
         } catch (NumberFormatException e) {
             mostrarError(
                     "Precio incorrecto",
