@@ -11,12 +11,12 @@ import java.util.List;
 public class ProductoDAO {
 
     // CREATE — Registrar un nuevo producto
-    public boolean guardar(Producto producto) {
+    public void guardar(Producto producto) throws SQLException {
         String sql = """
-            INSERT INTO producto (
-                codigo, nombre, categoria_id, precio_venta, existencia, ruta_imagen, activo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """;
+        INSERT INTO producto (
+            codigo, nombre, categoria_id, precio_venta, existencia, ruta_imagen, activo
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -29,19 +29,13 @@ public class ProductoDAO {
             ps.setString(6, producto.getRutaImagen());
             ps.setBoolean(7, producto.isActivo());
 
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows > 0) {
-                try (ResultSet rs = ps.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        producto.setId(rs.getInt(1));
-                    }
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    producto.setId(rs.getInt(1));
                 }
-                return true;
             }
-            return false;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 

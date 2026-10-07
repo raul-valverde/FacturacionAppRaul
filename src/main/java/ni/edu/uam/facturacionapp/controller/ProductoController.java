@@ -17,6 +17,7 @@ import ni.edu.uam.facturacionapp.model.Producto;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -155,6 +156,14 @@ public class ProductoController {
         alert.showAndWait();
     }
 
+    private void mostrarExito(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
     // 9. Validar campos obligatorios de Producto y reglas adicionales
     private boolean validarProducto(Integer idActual) {
         String codigo = txtCodigo.getText() != null ? txtCodigo.getText().trim() : "";
@@ -279,7 +288,7 @@ public class ProductoController {
             BigDecimal precio = new BigDecimal(txtPrecio.getText().trim());
             int existencia = Integer.parseInt(txtExistencia.getText().trim());
 
-            Producto nuevoProducto = new Producto(
+            Producto producto = new Producto(
                     null,
                     txtCodigo.getText().trim(),
                     txtNombre.getText().trim(),
@@ -290,16 +299,23 @@ public class ProductoController {
                     chkActivo.isSelected()
             );
 
-            if (productoDAO.guardar(nuevoProducto)) {
-                mensaje(Alert.AlertType.INFORMATION, "Producto guardado con éxito.");
-                cargarProductos();
-                limpiarFormulario();
-            } else {
-                mensaje(Alert.AlertType.ERROR, "No se pudo guardar el producto en la base de datos.");
-            }
+            // Operación DAO que lanza SQLException
+            productoDAO.guardar(producto);
 
-        } catch (Exception e) {
-            mensaje(Alert.AlertType.ERROR, "Error inesperado: " + e.getMessage());
+            mostrarExito(
+                    "Producto registrado",
+                    "El producto se guardó correctamente."
+            );
+
+            cargarProductos();
+            limpiarFormulario();
+
+        } catch (SQLException e) {
+            mostrarError(
+                    "Error de base de datos",
+                    "No fue posible registrar el producto."
+            );
+            System.err.println(e.getMessage());
         }
     }
 
