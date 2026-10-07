@@ -28,7 +28,7 @@ public class ProductoController {
     @FXML private ComboBox<Categoria> cmbFiltroCategoria;
 
     @FXML private TextField txtCodigo, txtNombre, txtPrecio, txtExistencia;
-    @FXML private ComboBox<Categoria> cmbCategoria;
+    @FXML private ComboBox<Categoria> cbCategoria; //Le elimino la m para seguir la guia
     @FXML private CheckBox chkActivo;
     @FXML private ImageView imgProducto;
     @FXML private TableView<Producto> tblProductos;
@@ -60,7 +60,7 @@ public class ProductoController {
 
         // Cargar Categorías reales desde la Base de Datos
         List<Categoria> listaCategorias = categoriaDAO.listar();
-        cmbCategoria.setItems(FXCollections.observableArrayList(listaCategorias));
+        cbCategoria.setItems(FXCollections.observableArrayList(listaCategorias));
 
         // Cargar Filtros de Categoría y Estado
         List<Categoria> categoriasFiltro = new ArrayList<>();
@@ -132,7 +132,7 @@ public class ProductoController {
         txtPrecio.setText(p.getPrecioVenta() != null ? p.getPrecioVenta().toString() : "");
         txtExistencia.setText(String.valueOf(p.getExistencia()));
         chkActivo.setSelected(p.isActivo());
-        cmbCategoria.setValue(p.getCategoria());
+        cbCategoria.setValue(p.getCategoria());
 
         rutaImagen = p.getRutaImagen();
         if (rutaImagen != null && !rutaImagen.isBlank()) {
@@ -179,6 +179,17 @@ public class ProductoController {
             return false;
         }
 
+        Categoria categoria = cbCategoria.getSelectionModel().getSelectedItem();
+
+        if (categoria == null) {
+            mostrarError(
+                    "Validación",
+                    "Debe seleccionar una categoria."
+            );
+            cbCategoria.requestFocus();
+            return false;
+        }
+
         // Control de código duplicado
         boolean codigoExiste = (idActual == null)
                 ? productoDAO.existeCodigo(codigo)
@@ -191,9 +202,9 @@ public class ProductoController {
         }
 
         // Selección obligatoria de categoría
-        if (cmbCategoria.getValue() == null) {
+        if (cbCategoria.getValue() == null) {
             mostrarError("Validación", "Debe seleccionar una categoría.");
-            cmbCategoria.requestFocus();
+            cbCategoria.requestFocus();
             return false;
         }
 
@@ -242,7 +253,7 @@ public class ProductoController {
                     null,
                     txtCodigo.getText().trim(),
                     txtNombre.getText().trim(),
-                    cmbCategoria.getValue(),
+                    cbCategoria.getValue(),
                     precio,
                     existencia,
                     rutaImagen,
@@ -281,7 +292,7 @@ public class ProductoController {
 
             seleccionado.setCodigo(txtCodigo.getText().trim());
             seleccionado.setNombre(txtNombre.getText().trim());
-            seleccionado.setCategoria(cmbCategoria.getValue());
+            seleccionado.setCategoria(cbCategoria.getValue());
             seleccionado.setPrecioVenta(precio);
             seleccionado.setExistencia(existencia);
             seleccionado.setRutaImagen(rutaImagen);
@@ -342,7 +353,7 @@ public class ProductoController {
         txtNombre.clear();
         txtPrecio.clear();
         txtExistencia.clear();
-        cmbCategoria.getSelectionModel().clearSelection();
+        cbCategoria.getSelectionModel().clearSelection();
         chkActivo.setSelected(true);
         imgProducto.setImage(null);
         rutaImagen = null;
