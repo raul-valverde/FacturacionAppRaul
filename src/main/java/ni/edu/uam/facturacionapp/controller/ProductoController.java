@@ -272,25 +272,32 @@ public class ProductoController {
 
     @FXML
     private void actualizar() {
+        // 1. Comprobar que existe un registro seleccionado[cite: 8]
         Producto seleccionado = tblProductos.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {
-            mostrarError("Seleccione un producto", "Debe seleccionar un producto de la tabla para actualizar.");
+            mostrarAdvertencia(
+                    "Selección requerida",
+                    "Debe seleccionar un producto de la tabla para actualizar."
+            );
             return;
         }
 
         try {
-            // 1. Obtener y validar datos desde el formulario
+            // 2. Validar nuevamente todos los campos mediante obtenerProductoFormulario()[cite: 8]
             Producto datosNuevos = obtenerProductoFormulario();
 
-            // 2. Control de código duplicado excluyendo el ID seleccionado
+            // 3. Comprobar que los datos únicos no pertenecen a otro registro (excluyendo el ID actual)[cite: 8]
             if (productoDAO.existeCodigo(datosNuevos.getCodigo(), seleccionado.getId())) {
-                mostrarError("Validación", "El código de producto '" + datosNuevos.getCodigo() + "' ya se encuentra registrado.");
+                mostrarAdvertencia(
+                        "Código duplicado",
+                        "El código '" + datosNuevos.getCodigo() + "' ya pertenece a otro producto."
+                );
                 txtCodigo.requestFocus();
                 return;
             }
 
-            // 3. Actualizar propiedades del objeto seleccionado
+            // Asignar los nuevos valores manteniendo el ID del registro seleccionado[cite: 8]
             seleccionado.setCodigo(datosNuevos.getCodigo());
             seleccionado.setNombre(datosNuevos.getNombre());
             seleccionado.setCategoria(datosNuevos.getCategoria());
@@ -299,18 +306,35 @@ public class ProductoController {
             seleccionado.setRutaImagen(datosNuevos.getRutaImagen());
             seleccionado.setActivo(datosNuevos.isActivo());
 
-            if (productoDAO.actualizar(seleccionado)) {
+            // 4. Ejecutar el UPDATE[cite: 8]
+            boolean actualizado = productoDAO.actualizar(seleccionado);
+
+            if (actualizado) {
+                // 6. Actualizar el TableView y limpiar[cite: 8]
                 tblProductos.refresh();
-                mostrarExito("Producto actualizado", "El producto se actualizó correctamente.");
+                mostrarExito(
+                        "Producto actualizado",
+                        "La información fue actualizada correctamente."
+                );
                 limpiarFormulario();
             } else {
-                mostrarError("Error", "No se pudo actualizar el producto en la base de datos.");
+                mostrarError(
+                        "Error de base de datos",
+                        "No fue posible actualizar el producto."
+                );
             }
 
+            // 5. Controlar posibles excepciones[cite: 8]
         } catch (IllegalArgumentException e) {
-            mostrarError("Validación", e.getMessage());
+            mostrarAdvertencia(
+                    "Validación",
+                    e.getMessage()
+            );
         } catch (Exception e) {
-            mostrarError("Error", "Error al actualizar: " + e.getMessage());
+            mostrarError(
+                    "Error inesperado",
+                    "Ocurrió un error al actualizar: " + e.getMessage()
+            );
         }
     }
 
