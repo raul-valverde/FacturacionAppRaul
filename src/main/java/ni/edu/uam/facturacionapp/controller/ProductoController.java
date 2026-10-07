@@ -176,6 +176,7 @@ public class ProductoController {
         String codigo = txtCodigo.getText() != null ? txtCodigo.getText().trim() : "";
         String nombre = txtNombre.getText() != null ? txtNombre.getText().trim() : "";
 
+        // Código vacío
         if (codigo.isEmpty()) {
             throw new IllegalArgumentException("El código es obligatorio.");
         }
@@ -184,32 +185,33 @@ public class ProductoController {
             throw new IllegalArgumentException("El nombre es obligatorio.");
         }
 
+        // Categoría no seleccionada
         Categoria categoria = cbCategoria.getSelectionModel().getSelectedItem();
-
         if (categoria == null) {
             throw new IllegalArgumentException("Debe seleccionar una categoría.");
         }
 
+        // Precio incorrecto
         BigDecimal precio;
-
         try {
             precio = new BigDecimal(txtPrecio.getText().trim());
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("El precio debe ser numérico.");
+            throw new IllegalArgumentException("El precio debe ser un valor numérico.");
         }
 
         if (precio.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El precio debe ser mayor que cero.");
         }
 
+        // Existencia negativa / formato
         int existencia;
-
         try {
             existencia = Integer.parseInt(txtExistencia.getText().trim());
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("La existencia debe ser un número entero.");
         }
 
+        // Existencia negativa
         if (existencia < 0) {
             throw new IllegalArgumentException("La existencia no puede ser negativa.");
         }
@@ -233,15 +235,13 @@ public class ProductoController {
 
             Producto producto = obtenerProductoFormulario();
 
+            // Código duplicado
             if (productoDAO.existeCodigo(producto.getCodigo())) {
-
-                mostrarAdvertencia(
-                        "Código duplicado",
-                        "Ya existe un producto con ese código."
-                );
-
+                mostrarAdvertencia("Código duplicado", "Ya existe un producto con ese código.");
+                txtCodigo.requestFocus();
                 return;
             }
+
 
             productoDAO.guardar(producto);
 
@@ -261,12 +261,10 @@ public class ProductoController {
                     e.getMessage()
             );
 
+            // Error SQL
         } catch (SQLException e) {
-
-            mostrarError(
-                    "Error de base de datos",
-                    "No fue posible registrar el producto."
-            );
+            mostrarError("Error SQL", "No fue posible completar la operación.");
+            System.err.println(e.getMessage());
         }
     }
 
@@ -288,11 +286,9 @@ public class ProductoController {
             Producto datosNuevos = obtenerProductoFormulario();
 
             // 3. Comprobar que los datos únicos no pertenecen a otro registro (excluyendo el ID actual)[cite: 8]
+            // Código duplicado
             if (productoDAO.existeCodigo(datosNuevos.getCodigo(), seleccionado.getId())) {
-                mostrarAdvertencia(
-                        "Código duplicado",
-                        "El código '" + datosNuevos.getCodigo() + "' ya pertenece a otro producto."
-                );
+                mostrarAdvertencia("Código duplicado", "Ya existe un producto con ese código.");
                 txtCodigo.requestFocus();
                 return;
             }

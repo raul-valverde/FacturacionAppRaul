@@ -25,7 +25,7 @@ public class CategoriaController {
     private void initialize() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colActivo.setCellValueFactory(new PropertyValueFactory<>("activo"));
+        colActivo.setCellValueFactory(new PropertyValueFactory<>("activa"));
 
         tblCategorias.setItems(listaCategorias);
         cargarCategorias();
@@ -53,12 +53,28 @@ public class CategoriaController {
         alert.showAndWait();
     }
 
+    private void mostrarExito(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    private void mostrarError(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
     // Validaciones de nombre antes de guardar o actualizar
     private boolean validarCamposNombre(Integer idActual) {
         String nombre = txtNombre.getText() != null ? txtNombre.getText().trim() : "";
 
         if (nombre.isEmpty()) {
-            mostrarAdvertencia("Validación", "El nombre de la categoría es obligatorio.");
+            mostrarAdvertencia("Validación", "El nombre es obligatorio.");
             txtNombre.requestFocus();
             return false;
         }
@@ -84,11 +100,11 @@ public class CategoriaController {
 
         Categoria nueva = new Categoria(0, txtNombre.getText().trim(), chkActivo.isSelected());
         if (categoriaDAO.guardar(nueva)) {
-            mensaje(Alert.AlertType.INFORMATION, "Categoría guardada con éxito.");
+            mostrarExito("Éxito", "Categoría guardada con éxito.");
             cargarCategorias();
-            limpiar();
+            limpiarFormulario();
         } else {
-            mensaje(Alert.AlertType.ERROR, "Error al guardar la categoría.");
+            mostrarError("Error SQL", "No fue posible completar la operación.");
         }
     }
 
@@ -99,7 +115,7 @@ public class CategoriaController {
 
         if (seleccionada == null) {
             mostrarAdvertencia(
-                    "Seleccione una categoría",
+                    "Selección requerida",
                     "Debe seleccionar la categoría que desea actualizar."
             );
             return;
@@ -113,11 +129,11 @@ public class CategoriaController {
         seleccionada.setActiva(chkActivo.isSelected());
 
         if (categoriaDAO.actualizar(seleccionada)) {
-            mensaje(Alert.AlertType.INFORMATION, "Categoría actualizada con éxito.");
+            mostrarExito("Éxito", "Categoría actualizada con éxito.");
             cargarCategorias();
-            limpiar();
+            limpiarFormulario();
         } else {
-            mensaje(Alert.AlertType.ERROR, "Error al actualizar la categoría.");
+            mostrarError("Error SQL", "No fue posible completar la operación.");
         }
     }
 
@@ -127,40 +143,49 @@ public class CategoriaController {
         Categoria seleccionada = tblCategorias.getSelectionModel().getSelectedItem();
 
         if (seleccionada == null) {
-            mostrarAdvertencia(
-                    "Seleccione una categoría",
-                    "Debe seleccionar la categoría que desea eliminar."
-            );
+            mostrarAdvertencia("Selección requerida", "Debe seleccionar una categoría.");
             return;
         }
 
-        // Consulta si existen productos asociados antes de ejecutar DELETE
+        // Categoría con productos
         if (categoriaDAO.tieneProductos(seleccionada.getId())) {
             mostrarAdvertencia(
-                    "Operación cancelada",
-                    "No se puede eliminar la categoría porque existen productos asociados."
+                    "Categoría con productos",
+                    "No puede eliminar la categoría porque tiene productos asociados."
             );
             return;
         }
 
-        if (categoriaDAO.eliminar(seleccionada.getId())) {
-            mensaje(Alert.AlertType.INFORMATION, "Categoría eliminada con éxito.");
-            cargarCategorias();
-            limpiar();
-        } else {
-            mensaje(Alert.AlertType.ERROR, "Error al eliminar la categoría.");
+        // Confirmación y eliminación
+        Alert confirmacion = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "¿Está seguro de eliminar la categoría '" + seleccionada.getNombre() + "'?",
+                ButtonType.YES, ButtonType.NO
+        );
+
+        if (confirmacion.showAndWait().orElse(ButtonType.NO) == ButtonType.YES) {
+            if (categoriaDAO.eliminar(seleccionada.getId())) {
+                cargarCategorias();
+                limpiarFormulario();
+                mostrarExito("Éxito", "Categoría eliminada correctamente.");
+            } else {
+                // Error SQL
+                mostrarError("Error SQL", "No fue posible completar la operación.");
+            }
         }
     }
 
     @FXML
-    private void limpiar() {
+    private void limpiarFormulario() {
         txtNombre.clear();
         chkActivo.setSelected(true);
         categoriaSeleccionada = null;
         tblCategorias.getSelectionModel().clearSelection();
     }
 
-    private void mensaje(Alert.AlertType tipo, String texto) {
-        new Alert(tipo, texto, ButtonType.OK).showAndWait();
+    // Alias para mantener compatibilidad si el FXML lo invoca como "limpiar"
+    @FXML
+    private void limpiar() {
+        limpiarFormulario();
     }
 }
