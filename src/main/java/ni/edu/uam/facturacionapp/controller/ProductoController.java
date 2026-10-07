@@ -340,25 +340,58 @@ public class ProductoController {
 
     @FXML
     private void eliminar() {
+        // 1. Comprobar que existe una selección[cite: 9]
         Producto seleccionado = tblProductos.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {
-            mostrarError("Seleccione un producto", "Debe seleccionar un producto de la tabla para eliminar.");
+            mostrarAdvertencia(
+                    "Selección requerida",
+                    "Debe seleccionar un producto de la tabla para eliminar."
+            );
             return;
         }
 
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION,
+        // 2. Solicitar confirmación[cite: 9]
+        Alert confirmacion = new Alert(
+                Alert.AlertType.CONFIRMATION,
                 "¿Está seguro de eliminar el producto '" + seleccionado.getNombre() + "'?",
-                ButtonType.YES, ButtonType.NO);
+                ButtonType.YES,
+                ButtonType.NO
+        );
         Optional<ButtonType> respuesta = confirmacion.showAndWait();
 
         if (respuesta.isPresent() && respuesta.get() == ButtonType.YES) {
-            if (productoDAO.eliminar(seleccionado.getId())) {
-                cargarProductos();
-                mensaje(Alert.AlertType.INFORMATION, "Producto eliminado correctamente.");
-                limpiarFormulario();
-            } else {
-                mensaje(Alert.AlertType.ERROR, "No se pudo eliminar el producto de la base de datos.");
+            try {
+                // 3. Verificar restricciones de FK en BD y 4. Ejecutar DELETE[cite: 9]
+                boolean eliminado = productoDAO.eliminar(seleccionado.getId());
+
+                if (eliminado) {
+                    // 6. Actualizar el TableView y limpiar formulario[cite: 9]
+                    cargarProductos();
+                    limpiarFormulario();
+                    mostrarExito(
+                            "Producto eliminado",
+                            "El producto fue eliminado correctamente."
+                    );
+                } else {
+                    mostrarError(
+                            "Error de base de datos",
+                            "No fue posible eliminar el producto."
+                    );
+                }
+
+                // 5. Controlar SQLException (ej. restricción de clave foránea en ventas)[cite: 9]
+            } catch (SQLException e) {
+                mostrarError(
+                        "Error de restricciones",
+                        "No se puede eliminar el producto porque tiene registros relacionados."
+                );
+                System.err.println(e.getMessage());
+            } catch (Exception e) {
+                mostrarError(
+                        "Error inesperado",
+                        "Ocurrió un error al eliminar: " + e.getMessage()
+                );
             }
         }
     }

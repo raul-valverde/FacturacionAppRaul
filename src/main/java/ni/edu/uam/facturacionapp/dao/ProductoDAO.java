@@ -67,7 +67,8 @@ public class ProductoDAO {
     }
 
     // DELETE — Eliminar un producto
-    public boolean eliminar(int id) {
+    // DELETE — Eliminar un producto permitiendo propagar SQLException
+    public boolean eliminar(int id) throws SQLException {
         String sql = "DELETE FROM producto WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -75,9 +76,6 @@ public class ProductoDAO {
 
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 
