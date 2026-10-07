@@ -47,7 +47,7 @@ public class ProductoDAO {
             WHERE id = ?
             """;
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabaseConnection.getConnection();// aca esta el apso 16 en los metodos CRUD crear guardar actualizar eliminar
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, producto.getCodigo());
