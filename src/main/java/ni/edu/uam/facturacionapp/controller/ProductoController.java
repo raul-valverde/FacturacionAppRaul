@@ -211,13 +211,11 @@ public class ProductoController {
         // Validación de precio de venta (numérico y > 0)
         try {
             BigDecimal precio = new BigDecimal(txtPrecio.getText().trim());
-            if (precio.compareTo(BigDecimal.ZERO) <= 0) {
-                mostrarError("Validación", "El precio de venta debe ser mayor que cero.");
-                txtPrecio.requestFocus();
-                return false;
-            }
         } catch (NumberFormatException e) {
-            mostrarError("Validación", "El precio de venta debe ser un número válido.");
+            mostrarError(
+                    "Precio incorrecto",
+                    "El precio debe contener únicamente valores numéricos."
+            );
             txtPrecio.requestFocus();
             return false;
         }
@@ -225,13 +223,11 @@ public class ProductoController {
         // Validación de existencia (entero no negativo)
         try {
             int existencia = Integer.parseInt(txtExistencia.getText().trim());
-            if (existencia < 0) {
-                mostrarError("Validación", "La existencia debe ser un número no negativo.");
-                txtExistencia.requestFocus();
-                return false;
-            }
         } catch (NumberFormatException e) {
-            mostrarError("Validación", "La existencia debe ser un número entero válido.");
+            mostrarError(
+                    "Existencia incorrecta",
+                    "La existencia debe ser un número entero válido."
+            );
             txtExistencia.requestFocus();
             return false;
         }
