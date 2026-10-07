@@ -170,6 +170,20 @@ public class ProductoController {
             return false;
         }
 
+        // Verificación de código duplicado en BD
+        boolean existe = (idActual == null)
+                ? productoDAO.existeCodigo(codigo)
+                : productoDAO.existeCodigo(codigo, idActual);
+
+        if (existe) {
+            mostrarError(
+                    "Validación",
+                    "El código de producto '" + codigo + "' ya se encuentra registrado."
+            );
+            txtCodigo.requestFocus();
+            return false;
+        }
+
         if (nombre.isEmpty()) {
             mostrarError(
                     "Validación",

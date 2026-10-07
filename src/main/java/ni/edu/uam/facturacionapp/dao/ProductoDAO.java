@@ -126,18 +126,20 @@ public class ProductoDAO {
         return lista;
     }
 
-    // Consulta previa para código duplicado en INSERT
+    // 14. Verificar si existe el código antes de registrar (INSERT)
     public boolean existeCodigo(String codigo) {
         String sql = """
-            SELECT COUNT(*)
-            FROM producto
-            WHERE LOWER(codigo) = LOWER(?)
-            """;
+        SELECT COUNT(*)
+        FROM producto
+        WHERE codigo = ?
+        """;
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (
+                Connection cn = DatabaseConnection.getConnection();
+                PreparedStatement ps = cn.prepareStatement(sql)
+        ) {
             ps.setString(1, codigo.trim());
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;
@@ -146,22 +148,25 @@ public class ProductoDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return false;
     }
 
-    // Consulta previa para código duplicado en UPDATE (excluyendo el id actual)
+    // Sobrecarga para verificar código duplicado en modificación (UPDATE), excluyendo el ID actual
     public boolean existeCodigo(String codigo, int idExcluir) {
         String sql = """
-            SELECT COUNT(*)
-            FROM producto
-            WHERE LOWER(codigo) = LOWER(?) AND id <> ?
-            """;
+        SELECT COUNT(*)
+        FROM producto
+        WHERE codigo = ? AND id <> ?
+        """;
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (
+                Connection cn = DatabaseConnection.getConnection();
+                PreparedStatement ps = cn.prepareStatement(sql)
+        ) {
             ps.setString(1, codigo.trim());
             ps.setInt(2, idExcluir);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;
@@ -170,6 +175,8 @@ public class ProductoDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return false;
     }
+
 }
