@@ -8,3 +8,4 @@ public class Launcher {
         Application.launch(FacturacionApplication.class, args);
     }
 }
+//Finalizo practica deManejo de excepciones y validacion de Opreaciones de manera individual

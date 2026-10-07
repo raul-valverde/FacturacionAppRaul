@@ -35,7 +35,7 @@
                 <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
                 <Label text="Categoría:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                <ComboBox fx:id="cmbCategoria" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <ComboBox fx:id="cbCategoria" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
                 <Label text="Precio:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
                 <TextField fx:id="txtPrecio" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
@@ -66,7 +66,7 @@
             <BorderPane.margin>
                 <Insets top="10"/>
             </BorderPane.margin>
-            <Button fx:id="btnGuardar" onAction="#guardar" text="Guardar"/>
+            <Button fx:id="btnGuardar" onAction="#guardarProducto" text="Guardar"/>
             <Button fx:id="btnActualizar" onAction="#actualizar" text="Actualizar"/>
             <Button fx:id="btnEliminar" onAction="#eliminar" text="Eliminar"/>
             <Button fx:id="btnLimpiar" onAction="#limpiarFormulario" text="Limpiar"/>
