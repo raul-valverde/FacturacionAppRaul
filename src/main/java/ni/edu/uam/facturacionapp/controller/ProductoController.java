@@ -231,11 +231,22 @@ public class ProductoController {
 
         // Validación de existencia (entero no negativo)
         try {
+
             int existencia = Integer.parseInt(txtExistencia.getText().trim());
+
+            if (existencia < 0) {
+                mostrarError(
+                        "Existencia incorrecta",
+                        "La existencia no puede ser negativa."
+                );
+                txtExistencia.requestFocus();
+                return false;
+            }
+
         } catch (NumberFormatException e) {
             mostrarError(
                     "Existencia incorrecta",
-                    "La existencia debe ser un número entero válido."
+                    "La existencia debe ser un número entero."
             );
             txtExistencia.requestFocus();
             return false;
